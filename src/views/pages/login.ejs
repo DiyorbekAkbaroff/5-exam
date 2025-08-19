@@ -1,0 +1,126 @@
+<section class="auth">
+    <h2>Kirish</h2>
+    
+    <!-- Step 1: Email Input -->
+    <div id="step1" class="auth-step">
+        <form id="emailForm" class="auth-form">
+            <div class="form-group">
+                <label for="email">Email manzil</label>
+                <input type="email" id="email" name="email" placeholder="Emailingizni kiriting" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Kod yuborish</button>
+        </form>
+        <p class="auth-info">
+            Avval emailingizga 6 xonali kod yuboriladi, keyin kodni kiriting
+        </p>
+    </div>
+
+    <!-- Step 2: Code Verification -->
+    <div id="step2" class="auth-step" style="display: none;">
+        <form id="codeForm" class="auth-form">
+            <div class="form-group">
+                <label for="code">Autentifikatsiya kodi</label>
+                <input type="text" id="code" name="code" placeholder="6 xonali kodni kiriting" 
+                       maxlength="6" pattern="[0-9]{6}" required />
+                <small class="form-help">Emailingizga yuborilgan 6 xonali kod</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Tasdiqlash</button>
+            <button type="button" id="backToEmail" class="btn btn-outline">Boshqa email</button>
+        </form>
+        <p class="auth-info">
+            Kod 10 daqiqa davomida amal qiladi
+        </p>
+    </div>
+
+    <div class="auth-footer">
+        <p>Hisobingiz yo'qmi? <a href="/register">Ro'yxatdan o'ting</a></p>
+    </div>
+</section>
+
+<script>
+let currentEmail = '';
+
+// Step 1: Send verification code
+document.getElementById('emailForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    currentEmail = email;
+    
+    try {
+        const response = await fetch('/api/auth/send-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Show success message and move to step 2
+            showToast(data.message, 'success');
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        } else {
+            showToast(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Xatolik yuz berdi', 'error');
+    }
+});
+
+// Step 2: Verify code
+document.getElementById('codeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const code = document.getElementById('code').value;
+    
+    try {
+        const response = await fetch('/api/auth/verify-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: currentEmail, code })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message, 'success');
+            // Redirect to home page after successful login
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        } else {
+            showToast(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Xatolik yuz berdi', 'error');
+    }
+});
+
+// Back to email step
+document.getElementById('backToEmail').addEventListener('click', () => {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('code').value = '';
+});
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>

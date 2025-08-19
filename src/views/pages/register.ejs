@@ -1,0 +1,101 @@
+<section class="auth">
+    <h2>Ro'yxatdan o'tish</h2>
+    
+    <form id="registerForm" class="auth-form">
+        <div class="form-group">
+            <label for="name">To'liq ism</label>
+            <input type="text" id="name" name="name" placeholder="Ismingizni kiriting" required />
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email manzil</label>
+            <input type="email" id="email" name="email" placeholder="Emailingizni kiriting" required />
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Telefon raqam</label>
+            <input type="tel" id="phone" name="phone" placeholder="+998 XX XXX XX XX" />
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Parol</label>
+            <input type="password" id="password" name="password" placeholder="Parolingizni kiriting" required />
+            <small class="form-help">Kamida 6 ta belgi bo'lishi kerak</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="confirmPassword">Parolni tasdiqlang</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Parolingizni qayta kiriting" required />
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Ro'yxatdan o'tish</button>
+    </form>
+    
+    <div class="auth-footer">
+        <p>Allaqachon hisobingiz bormi? <a href="/login">Kiring</a></p>
+    </div>
+</section>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        password: formData.get('password'),
+        confirmPassword: formData.get('confirmPassword')
+    };
+    
+    // Validation
+    if (data.password !== data.confirmPassword) {
+        showToast('Parollar mos kelmadi', 'error');
+        return;
+    }
+    
+    if (data.password.length < 6) {
+        showToast('Parol kamida 6 ta belgi bo\'lishi kerak', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast(result.message, 'success');
+            // Redirect to login page after successful registration
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        } else {
+            showToast(result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Xatolik yuz berdi', 'error');
+    }
+});
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>

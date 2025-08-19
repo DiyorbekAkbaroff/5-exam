@@ -1,0 +1,51 @@
+<header class="navbar">
+    <div class="nav-wrapper">
+        <div class="nav-left">
+            <a href="/" class="brand">Avto Salon</a>
+            <div class="breadcrumbs">
+                <span class="breadcrumb-item">Bosh sahifa</span>
+                <% if (typeof breadcrumbs !== 'undefined' && breadcrumbs.length > 0) { %>
+                    <% breadcrumbs.forEach(function(breadcrumb, index) { %>
+                        <span class="breadcrumb-separator">></span>
+                        <span class="breadcrumb-item"><%= breadcrumb %></span>
+                    <% }); %>
+                <% } %>
+            </div>
+        </div>
+        <nav>
+            <a href="/">Asosiy</a>
+            <a href="/models">Modellari</a>
+            <% if (user) { %>
+                <a href="/profile">Profil</a>
+                <a href="/bookmarks">Sevimlilar</a>
+                <button id="logoutBtn" class="link">Chiqish</button>
+            <% } else { %>
+                <a href="/login">Kirish</a>
+                <a href="/register">Ro'yxatdan o'tish</a>
+            <% } %>
+            <a href="/admin-login" class="admin-btn">
+                <i class="admin-icon">👤</i>
+                Admin o'tish
+            </a>
+        </nav>
+    </div>
+</header>
+
+<script>
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+        const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            window.location.href = '/';
+        }
+    } catch (error) {
+        console.error('Logout failed:', error);
+    }
+});
+</script>

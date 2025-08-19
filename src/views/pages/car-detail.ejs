@@ -1,0 +1,120 @@
+<section class="container">
+    <div class="car-detail-header">
+        <h2>Modellari</h2>
+        <h1 class="car-title"><%= car.brand %> <%= car.model %></h1>
+        <p class="car-price"><%= car.price.toLocaleString() %> so'm dan</p>
+    </div>
+    
+    <div class="car-detail-content">
+        <div class="car-image-section">
+            <div class="car-image-container">
+                <img src="<%= currentView === 'exterior' ? car.exteriorImage : car.interiorImage %>" 
+                     alt="<%= car.brand %> <%= car.model %>" 
+                     class="car-main-image">
+            </div>
+            
+            <div class="view-selector">
+                <label class="view-option">
+                    <input type="radio" name="view" value="exterior" 
+                           <%= currentView === 'exterior' ? 'checked' : '' %>>
+                    <span class="view-label">Tashqi</span>
+                </label>
+                <label class="view-option">
+                    <input type="radio" name="view" value="interior" 
+                           <%= currentView === 'interior' ? 'checked' : '' %>>
+                    <span class="view-label">Ichki makon</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="car-specifications">
+            <h3>Texnik xususiyatlar</h3>
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <span class="spec-label">Marka:</span>
+                    <span class="spec-value"><%= car.brand %></span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Tanirovkasi:</span>
+                    <span class="spec-value"><%= car.tinting %></span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Motor:</span>
+                    <span class="spec-value"><%= car.engine %></span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Yili:</span>
+                    <span class="spec-value"><%= car.year %></span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Rangi:</span>
+                    <span class="spec-value"><%= car.color %></span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Masofa:</span>
+                    <span class="spec-value"><%= car.distance %> km</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Gearbox:</span>
+                    <span class="spec-value"><%= car.gearbox %></span>
+                </div>
+            </div>
+            
+            <% if (currentView === 'exterior') { %>
+                <div class="car-description">
+                    <h4>Tavsif</h4>
+                    <p><%= car.description %></p>
+                </div>
+                <div class="car-total-cost">
+                    <h4>Umumiy xarajat</h4>
+                    <p class="total-price"><%= car.price.toLocaleString() %> so'm dan</p>
+                </div>
+            <% } else { %>
+                <div class="car-description">
+                    <h4>Eslatma</h4>
+                    <p>Tasvir tanlangan konfiguratsiyaga mos kelmasligi mumkin. Mashinaning rangi ushbu saytda taqdim etilganidan farq qilishi mumkin.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<script>
+document.querySelectorAll('input[name="view"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        const view = e.target.value;
+        const carId = '<%= car.id %>';
+        const brand = '<%= car.brand.toLowerCase() %>';
+        
+        // Update URL without page reload
+        const newUrl = `/models/${brand}/${carId}?view=${view}`;
+        window.history.pushState({}, '', newUrl);
+        
+        // Update image and content
+        const carImage = document.querySelector('.car-main-image');
+        if (view === 'exterior') {
+            carImage.src = '<%= car.exteriorImage %>';
+        } else {
+            carImage.src = '<%= car.interiorImage %>';
+        }
+        
+        // Update description section
+        const descriptionSection = document.querySelector('.car-description');
+        const totalCostSection = document.querySelector('.car-total-cost');
+        
+        if (view === 'exterior') {
+            descriptionSection.innerHTML = `
+                <h4>Tavsif</h4>
+                <p><%= car.description %></p>
+            `;
+            totalCostSection.style.display = 'block';
+        } else {
+            descriptionSection.innerHTML = `
+                <h4>Eslatma</h4>
+                <p>Tasvir tanlangan konfiguratsiyaga mos kelmasligi mumkin. Mashinaning rangi ushbu saytda taqdim etilganidan farq qilishi mumkin.</p>
+            `;
+            totalCostSection.style.display = 'none';
+        }
+    });
+});
+</script> 
