@@ -53,6 +53,16 @@ const carSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -63,10 +73,18 @@ const carSchema = new mongoose.Schema({
   }
 });
 
-// Update timestamp on save
+// Update the updatedAt field before saving
 carSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
 });
+
+// Index for better performance
+carSchema.index({ category: 1 });
+carSchema.index({ brand: 1, model: 1 });
+carSchema.index({ price: 1 });
+carSchema.index({ year: 1 });
+carSchema.index({ isAvailable: 1 });
+carSchema.index({ createdBy: 1 });
 
 export default mongoose.model('Car', carSchema); 

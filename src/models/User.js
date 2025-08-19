@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import crypto from 'crypto-js';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -41,20 +42,29 @@ const userSchema = new mongoose.Schema({
   },
   lastLogin: {
     type: Date
+  },
+  refreshToken: {
+    type: String
+  },
+  passwordResetToken: {
+    type: String
+  },
+  passwordResetExpires: {
+    type: Date
   }
 });
 
 // Hash password before saving
-userSchema.pre('save', function(next) {
-  if (this.isModified('password')) {
-    this.password = crypto.SHA256(this.password).toString();
-  }
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
 // Method to compare password
-userSchema.methods.comparePassword = function(candidatePassword) {
-  return this.password === crypto.SHA256(candidatePassword).toString();
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 // Method to generate verification code
@@ -89,5 +99,35 @@ userSchema.methods.verifyCode = function(code) {
   
   return false;
 };
+
+// Method to create password reset token
+userSchema.methods.createPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+    
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  
+  return resetToken;
+};
+
+// Method to verify password reset token
+userSchema.methods.verifyPasswordResetToken = function(token) {
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+    
+  return this.passwordResetToken === hashedToken && 
+         this.passwordResetExpires > Date.now();
+};
+
+// Index for better performance
+userSchema.index({ email: 1 });
+userSchema.index({ refreshToken: 1 });
+userSchema.index({ passwordResetToken: 1 });
 
 export default mongoose.model('User', userSchema); 

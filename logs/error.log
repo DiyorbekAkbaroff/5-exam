@@ -1,0 +1,38 @@
+{
+  service: 'avto-salon',
+  email: 'adsasf@gmail.com',
+  userId: new ObjectId('68a4ca5bcc48560059e32815'),
+  level: 'error',
+  message: 'Failed to send verification email',
+  timestamp: '2025-08-20 00:02:52'
+}
+{
+  service: 'avto-salon',
+  error: 'Email yuborishda xatolik yuz berdi',
+  stack: 'Error: Email yuborishda xatolik yuz berdi\n' +
+    '    at file:///home/dior/Desktop/5-exam1/src/controller/enhanced-auth.controller.js:38:11\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)',
+  url: '/api/auth/register',
+  method: 'POST',
+  ip: '::1',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  userId: null,
+  level: 'error',
+  message: 'Global Error Handler',
+  timestamp: '2025-08-20 00:02:52'
+}
+{
+  service: 'avto-salon',
+  error: "Bu email allaqachon ro'yxatdan o'tgan",
+  stack: "Error: Bu email allaqachon ro'yxatdan o'tgan\n" +
+    '    at file:///home/dior/Desktop/5-exam1/src/controller/enhanced-auth.controller.js:15:11\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)',
+  url: '/api/auth/register',
+  method: 'POST',
+  ip: '::1',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  userId: null,
+  level: 'error',
+  message: 'Global Error Handler',
+  timestamp: '2025-08-20 00:02:53'
+}

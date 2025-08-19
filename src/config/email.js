@@ -113,4 +113,45 @@ export const sendOrderConfirmation = async (email, orderDetails) => {
   }
 };
 
+// New function to send password reset emails
+export const sendPasswordResetEmail = async (email, resetCode) => {
+  if (!transporter) {
+    console.error('Email transporter not configured');
+    return false;
+  }
+
+  const mailOptions = {
+    from: `${process.env.EMAIL_FROM_NAME || 'Avto Salon'} <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: 'Avto Salon - Parolni tiklash',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #6366f1; text-align: center;">Avto Salon</h2>
+        <div style="background: #f8fafc; padding: 20px; border-radius: 10px; margin: 20px 0;">
+          <h3 style="color: #1e293b; margin-bottom: 15px;">Parolni tiklash</h3>
+          <p style="color: #64748b; margin-bottom: 20px;">Parolni tiklash uchun quyidagi kodni kiriting:</p>
+          <div style="background: #ef4444; color: white; font-size: 32px; font-weight: bold; text-align: center; padding: 20px; border-radius: 8px; letter-spacing: 5px;">
+            ${resetCode}
+          </div>
+          <p style="color: #64748b; margin-top: 20px; font-size: 14px;">
+            Bu kod 10 daqiqa davomida amal qiladi. Agar siz bu so'rovni qilmagan bo'lsangiz, uni e'tiborsiz qoldiring.
+          </p>
+        </div>
+        <p style="color: #94a3b8; text-align: center; font-size: 12px;">
+          © ${new Date().getFullYear()} Avto Salon. Barcha huquqlar himoyalangan.
+        </p>
+      </div>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Password reset email sent successfully to ${email}`);
+    return true;
+  } catch (error) {
+    console.error('Password reset email error:', error.message);
+    return false;
+  }
+};
+
 export default transporter; 

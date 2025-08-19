@@ -1,6 +1,10 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import { sendVerificationCode } from '../config/email.js';
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { sendVerificationCode } from "../config/email.js";
+import { sendSuccess, sendError, handleControllerError } from "../utils/responseUtils.js";
+import { isValidEmail } from "../utils/validationUtils.js";
+import { USER_ROLES, HTTP_STATUS } from "../utils/constants.js";
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -14,43 +18,29 @@ export const adminLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    // Validate input
     if (!username || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Username va parol kiritilishi shart' 
-      });
+      return sendError(res, 'Username va parol kiritilishi shart', HTTP_STATUS.BAD_REQUEST);
     }
 
-    // Find admin user
-    const admin = await User.findOne({ 
-      $or: [
-        { email: username },
-        { name: { $regex: new RegExp(username, 'i') } }
-      ],
-      role: 'admin'
-    });
-    
+    // Find admin by username or email
+    const admin = await User.findOne({
+      $or: [{ username }, { email: username }],
+      role: USER_ROLES.ADMIN
+    }).select('+password');
+
     if (!admin) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Admin foydalanuvchi topilmadi' 
-      });
+      return sendError(res, 'Admin topilmadi', HTTP_STATUS.UNAUTHORIZED);
     }
 
     // Check password
     if (!admin.comparePassword(password)) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Noto\'g\'ri parol' 
-      });
+      return sendError(res, 'Noto\'g\'ri parol', HTTP_STATUS.UNAUTHORIZED);
     }
 
     // Check if admin is verified
     if (!admin.isVerified) {
-      return res.status(403).json({ 
-        success: false, 
-        message: 'Admin hisobi tasdiqlanmagan' 
-      });
+      return sendError(res, 'Admin akkaunt tasdiqlanmagan', HTTP_STATUS.FORBIDDEN);
     }
 
     // Update last login
@@ -59,31 +49,25 @@ export const adminLogin = async (req, res) => {
 
     // Generate token
     const token = generateToken(admin._id);
-            
-            // Set cookie
+
+    // Set cookie
     res.cookie('adminToken', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: process.env.NODE_ENV === 'production'
     });
 
-    res.json({
-      success: true,
-      message: 'Admin muvaffaqiyatli kirildi',
+    sendSuccess(res, {
       admin: {
         id: admin._id,
-        email: admin.email,
         name: admin.name,
+        email: admin.email,
         role: admin.role
       }
-    });
+    }, 'Admin muvaffaqiyatli kirdi');
 
   } catch (error) {
-    console.error('Admin login error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server xatosi' 
-    });
+    handleControllerError(res, error, 'Admin kirishda xatolik');
   }
 };
 

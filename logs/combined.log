@@ -1,0 +1,228 @@
+{
+  service: 'avto-salon',
+  port: '3000',
+  env: 'development',
+  level: 'info',
+  message: 'Server started',
+  timestamp: '2025-08-19 23:59:51'
+}
+{
+  service: 'avto-salon',
+  host: 'localhost',
+  level: 'info',
+  message: 'MongoDB Connected',
+  timestamp: '2025-08-19 23:59:51'
+}
+{
+  service: 'avto-salon',
+  port: '3000',
+  env: 'development',
+  level: 'info',
+  message: 'Server started',
+  timestamp: '2025-08-20 00:01:41'
+}
+{
+  service: 'avto-salon',
+  host: 'localhost',
+  level: 'info',
+  message: 'MongoDB Connected',
+  timestamp: '2025-08-20 00:01:41'
+}
+{
+  service: 'avto-salon',
+  port: '3000',
+  env: 'development',
+  level: 'info',
+  message: 'Server started',
+  timestamp: '2025-08-20 00:02:05'
+}
+{
+  service: 'avto-salon',
+  host: 'localhost',
+  level: 'info',
+  message: 'MongoDB Connected',
+  timestamp: '2025-08-20 00:02:05'
+}
+{
+  service: 'avto-salon',
+  method: 'GET',
+  url: '/',
+  statusCode: 200,
+  duration: '23ms',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  ip: '::1',
+  userId: null,
+  level: 'info',
+  message: 'HTTP Request',
+  timestamp: '2025-08-20 00:02:28'
+}
+{
+  service: 'avto-salon',
+  url: '/js/main.js',
+  method: 'GET',
+  ip: '::1',
+  level: 'warn',
+  message: '404 Not Found',
+  timestamp: '2025-08-20 00:02:28'
+}
+{
+  service: 'avto-salon',
+  method: 'GET',
+  url: '/js/main.js',
+  statusCode: 404,
+  duration: '8ms',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  ip: '::1',
+  userId: null,
+  level: 'warn',
+  message: 'HTTP Request Warning',
+  timestamp: '2025-08-20 00:02:28'
+}
+{
+  service: 'avto-salon',
+  url: '/assets/images/favicon.ico',
+  method: 'GET',
+  ip: '::1',
+  level: 'warn',
+  message: '404 Not Found',
+  timestamp: '2025-08-20 00:02:29'
+}
+{
+  service: 'avto-salon',
+  method: 'GET',
+  url: '/assets/images/favicon.ico',
+  statusCode: 404,
+  duration: '9ms',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  ip: '::1',
+  userId: null,
+  level: 'warn',
+  message: 'HTTP Request Warning',
+  timestamp: '2025-08-20 00:02:30'
+}
+{
+  service: 'avto-salon',
+  method: 'GET',
+  url: '/register',
+  statusCode: 200,
+  duration: '4ms',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  ip: '::1',
+  userId: null,
+  level: 'info',
+  message: 'HTTP Request',
+  timestamp: '2025-08-20 00:02:33'
+}
+{
+  service: 'avto-salon',
+  url: '/js/main.js',
+  method: 'GET',
+  ip: '::1',
+  level: 'warn',
+  message: '404 Not Found',
+  timestamp: '2025-08-20 00:02:33'
+}
+{
+  service: 'avto-salon',
+  method: 'GET',
+  url: '/js/main.js',
+  statusCode: 404,
+  duration: '6ms',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  ip: '::1',
+  userId: null,
+  level: 'warn',
+  message: 'HTTP Request Warning',
+  timestamp: '2025-08-20 00:02:33'
+}
+{
+  service: 'avto-salon',
+  email: 'adsasf@gmail.com',
+  userId: new ObjectId('68a4ca5bcc48560059e32815'),
+  level: 'error',
+  message: 'Failed to send verification email',
+  timestamp: '2025-08-20 00:02:52'
+}
+{
+  service: 'avto-salon',
+  error: 'Email yuborishda xatolik yuz berdi',
+  stack: 'Error: Email yuborishda xatolik yuz berdi\n' +
+    '    at file:///home/dior/Desktop/5-exam1/src/controller/enhanced-auth.controller.js:38:11\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)',
+  url: '/api/auth/register',
+  method: 'POST',
+  ip: '::1',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  userId: null,
+  level: 'error',
+  message: 'Global Error Handler',
+  timestamp: '2025-08-20 00:02:52'
+}
+{
+  service: 'avto-salon',
+  method: 'POST',
+  url: '/api/auth/register',
+  statusCode: 500,
+  duration: '1269ms',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  ip: '::1',
+  userId: null,
+  level: 'warn',
+  message: 'HTTP Request Warning',
+  timestamp: '2025-08-20 00:02:52'
+}
+{
+  service: 'avto-salon',
+  error: "Bu email allaqachon ro'yxatdan o'tgan",
+  stack: "Error: Bu email allaqachon ro'yxatdan o'tgan\n" +
+    '    at file:///home/dior/Desktop/5-exam1/src/controller/enhanced-auth.controller.js:15:11\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)',
+  url: '/api/auth/register',
+  method: 'POST',
+  ip: '::1',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  userId: null,
+  level: 'error',
+  message: 'Global Error Handler',
+  timestamp: '2025-08-20 00:02:53'
+}
+{
+  service: 'avto-salon',
+  method: 'POST',
+  url: '/api/auth/register',
+  statusCode: 400,
+  duration: '11ms',
+  userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+  ip: '::1',
+  userId: null,
+  level: 'warn',
+  message: 'HTTP Request Warning',
+  timestamp: '2025-08-20 00:02:53'
+}
+{
+  message: 'SIGTERM received, shutting down gracefully',
+  level: 'info',
+  service: 'avto-salon',
+  timestamp: '2025-08-20 00:04:45'
+}
+{
+  message: 'Process terminated',
+  level: 'info',
+  service: 'avto-salon',
+  timestamp: '2025-08-20 00:04:45'
+}
+{
+  service: 'avto-salon',
+  port: '3000',
+  env: 'development',
+  level: 'info',
+  message: 'Server started',
+  timestamp: '2025-08-20 00:10:27'
+}
+{
+  service: 'avto-salon',
+  host: 'localhost',
+  level: 'info',
+  message: 'MongoDB Connected',
+  timestamp: '2025-08-20 00:10:27'
+}

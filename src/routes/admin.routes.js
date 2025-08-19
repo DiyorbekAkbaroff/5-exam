@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { requireAdminAuth } from "../middleware/admin.middleware.js";
-import { uploadMultiple, uploadSingle } from "../middleware/upload.middleware.js";
+import { uploadMultiple } from "../middleware/upload.middleware.js";
 import { getAnalytics } from "../controller/analytics.controller.js";
-import Car from "../models/Car.js";
+import { sendSuccess, sendError, handleControllerError } from "../utils/responseUtils.js";
+import { buildQuery, buildSort, calculateSkip } from "../utils/dbUtils.js";
+import { getPaginationMeta } from "../utils/validationUtils.js";
 import User from "../models/User.js";
+import Car from "../models/Car.js";
 import Order from "../models/Order.js";
 import { sendOrderConfirmation } from "../config/email.js";
 
@@ -16,10 +19,9 @@ adminRouter.use(requireAdminAuth);
 adminRouter.get("/stats/users", async (req, res) => {
   try {
     const count = await User.countDocuments({ role: 'user' });
-    res.json({ count });
+    sendSuccess(res, { count });
   } catch (error) {
-    console.error('Error getting user stats:', error);
-    res.status(500).json({ success: false, message: 'Server xatosi' });
+    handleControllerError(res, error, 'Foydalanuvchi statistikasini olishda xatolik');
   }
 });
 
@@ -31,13 +33,12 @@ adminRouter.get("/stats/orders", async (req, res) => {
       { $group: { _id: null, total: { $sum: "$totalPrice" } } }
     ]);
     
-    res.json({ 
+    sendSuccess(res, { 
       count, 
       totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].total : 0 
     });
   } catch (error) {
-    console.error('Error getting order stats:', error);
-    res.status(500).json({ success: false, message: 'Server xatosi' });
+    handleControllerError(res, error, 'Buyurtma statistikasini olishda xatolik');
   }
 });
 
@@ -48,10 +49,9 @@ adminRouter.get("/users", async (req, res) => {
       .select('-password -verificationCode')
       .sort({ createdAt: -1 });
     
-    res.json(users);
+    sendSuccess(res, users);
   } catch (error) {
-    console.error('Error getting users:', error);
-    res.status(500).json({ success: false, message: 'Server xatosi' });
+    handleControllerError(res, error, 'Foydalanuvchilarni olishda xatolik');
   }
 });
 
