@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Create transporter with better error handling
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.warn('Email credentials not configured. Email functionality will be disabled.');
@@ -55,14 +54,12 @@ export const sendVerificationCode = async (email, code) => {
   };
 
   try {
-    // Verify transporter connection first
     await transporter.verify();
     await transporter.sendMail(mailOptions);
     console.log(`Verification email sent successfully to ${email}`);
     return true;
   } catch (error) {
     console.error('Email sending error:', error.message);
-    // Log specific error details for debugging
     if (error.code) {
       console.error('Error code:', error.code);
     }
@@ -70,7 +67,6 @@ export const sendVerificationCode = async (email, code) => {
   }
 };
 
-// New function to send order confirmation emails
 export const sendOrderConfirmation = async (email, orderDetails) => {
   if (!transporter) {
     console.error('Email transporter not configured');
@@ -113,7 +109,6 @@ export const sendOrderConfirmation = async (email, orderDetails) => {
   }
 };
 
-// New function to send password reset emails
 export const sendPasswordResetEmail = async (email, resetCode) => {
   if (!transporter) {
     console.error('Email transporter not configured');

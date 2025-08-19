@@ -10,6 +10,12 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  username: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true
+  },
   password: {
     type: String,
     required: true
@@ -22,6 +28,10 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     trim: true
+  },
+  profileImage: {
+    type: String,
+    default: null
   },
   isVerified: {
     type: Boolean,

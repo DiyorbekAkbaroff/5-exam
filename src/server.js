@@ -6,10 +6,8 @@ import expressLayouts from 'express-ejs-layouts';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Load environment variables
 dotenv.config();
 
-// Add JWT secrets to environment if not present
 if (!process.env.JWT_ACCESS_SECRET) {
   process.env.JWT_ACCESS_SECRET = 'your-access-secret-key-change-in-production';
 }
@@ -23,22 +21,19 @@ if (!process.env.JWT_REFRESH_EXPIRES) {
   process.env.JWT_REFRESH_EXPIRES = '7d';
 }
 
-// Import middleware
 import { globalErrorHandler, handleUncaughtException, handleUnhandledRejection } from './utils/errorHandler.js';
 import { requestLogger } from './config/logger.js';
 import logger from './config/logger.js';
 
-// Import routes
 import { mainRouter } from './routes/main.routes.js';
-import { authRouter as oldAuthRouter } from './routes/auth.routes.js';
-import { authRouter } from './routes/enhanced-auth.routes.js';
+import { authRouter } from './routes/auth.routes.js';
+import { authRouter as enhancedAuthRouter } from './routes/enhanced-auth.routes.js';
 import { carRouter } from './routes/enhanced-car.routes.js';
 import { categoryRouter } from './routes/category.routes.js';
 import { profileRouter } from './routes/profile.routes.js';
 import { viewRouter } from './routes/view.routes.js';
 import { adminRouter } from './routes/admin.routes.js';
 
-// Handle uncaught exceptions and unhandled rejections
 handleUncaughtException();
 handleUnhandledRejection();
 
@@ -47,22 +42,18 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// View engine setup
 app.set("layout", "layout/layout");
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(expressLayouts);
 
-// Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Request logging
 app.use(requestLogger);
 
-// Security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -70,31 +61,25 @@ app.use((req, res, next) => {
   next();
 });
 
-// Global variables for EJS templates
 app.use((req, res, next) => {
     res.locals.user = req.user || null;
     res.locals.admin = req.admin || null;
     next();
 });  
 
-// API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/cars', carRouter);
 app.use('/api/categories', categoryRouter);
 app.use('/api/profile', profileRouter);
 app.use('/api/admin', adminRouter);
 
-// View Routes
 app.use('/', mainRouter);
 app.use('/', viewRouter);
 
-// Backward compatibility for old auth routes
-app.use('/api/auth-old', oldAuthRouter);
+app.use('/api/auth-enhanced', enhancedAuthRouter);
 
-// Global error handler (must be last middleware)
 app.use(globalErrorHandler);
 
-// Handle 404 errors
 app.use((req, res) => {
   logger.warn('404 Not Found', {
     url: req.originalUrl,
@@ -115,7 +100,6 @@ app.use((req, res) => {
   }
 });
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/avto-salon')
   .then(() => {
     logger.info('MongoDB Connected', { host: mongoose.connection.host });
@@ -125,13 +109,11 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/avto-salo
     process.exit(1);
   });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   logger.info('Server started', { port: PORT, env: process.env.NODE_ENV });
 });
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received, shutting down gracefully');
   server.close(() => {

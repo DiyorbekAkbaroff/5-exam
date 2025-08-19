@@ -6,24 +6,21 @@ import { sendSuccess, sendError, handleControllerError } from "../utils/response
 import { isValidEmail } from "../utils/validationUtils.js";
 import { USER_ROLES, HTTP_STATUS } from "../utils/constants.js";
 
-// Generate JWT token
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET || 'your-secret-key', {
     expiresIn: '7d'
   });
 };
 
-// Admin login with username/password
 export const adminLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Validate input
     if (!username || !password) {
       return sendError(res, 'Username va parol kiritilishi shart', HTTP_STATUS.BAD_REQUEST);
     }
 
-    // Find admin by username or email
+    // Find admin
     const admin = await User.findOne({
       $or: [{ username }, { email: username }],
       role: USER_ROLES.ADMIN
@@ -34,7 +31,8 @@ export const adminLogin = async (req, res) => {
     }
 
     // Check password
-    if (!admin.comparePassword(password)) {
+    const isPasswordValid = await admin.comparePassword(password);
+    if (!isPasswordValid) {
       return sendError(res, 'Noto\'g\'ri parol', HTTP_STATUS.UNAUTHORIZED);
     }
 
@@ -57,6 +55,7 @@ export const adminLogin = async (req, res) => {
       secure: process.env.NODE_ENV === 'production'
     });
 
+    // Send success response
     sendSuccess(res, {
       admin: {
         id: admin._id,
@@ -135,6 +134,83 @@ export const addAdmin = async (req, res) => {
   }
 };
 
+// Login with email and password
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email va parol kiritilishi shart' 
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email }).select('+password');
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Bu email bilan foydalanuvchi topilmadi' 
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await user.comparePassword(password);
+    
+    if (!isPasswordValid) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Noto\'g\'ri parol' 
+      });
+    }
+
+    // Check if user is verified
+    if (!user.isVerified) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Email tasdiqlash talab qilinadi. Avval ro\'yxatdan o\'ting' 
+      });
+    }
+
+    // Update last login and clear existing sessions
+    user.lastLogin = new Date();
+    user.refreshToken = undefined; // Single session management
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user._id);
+    
+    // Set cookie
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    // Send success response
+    res.json({
+      success: true,
+      message: 'Muvaffaqiyatli kirildi',
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isVerified: user.isVerified
+      }
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server xatosi' 
+    });
+  }
+};
+
 // Send verification code
 export const sendCode = async (req, res) => {
   try {
@@ -147,7 +223,7 @@ export const sendCode = async (req, res) => {
       });
     }
 
-    // Check if user exists
+    // Find user
     let user = await User.findOne({ email });
     
     if (!user) {
@@ -161,7 +237,7 @@ export const sendCode = async (req, res) => {
     const code = user.generateVerificationCode();
     await user.save();
 
-    // Send email
+    // Send verification code via email
     const emailSent = await sendVerificationCode(email, code);
     
     if (!emailSent) {
@@ -171,6 +247,7 @@ export const sendCode = async (req, res) => {
       });
     }
 
+    // Send success response
     res.json({ 
       success: true, 
       message: 'Autentifikatsiya kodi emailingizga yuborildi' 
@@ -217,23 +294,28 @@ export const verifyCode = async (req, res) => {
       });
     }
 
-    // Update last login
+    // Mark user as verified and update last login
+    user.isVerified = true;
     user.lastLogin = new Date();
+    
+    // Clear any existing sessions for this user (single session management)
+    user.refreshToken = undefined;
     await user.save();
 
     // Generate token
     const token = generateToken(user._id);
             
-            // Set cookie
-            res.cookie('token', token, {
-                httpOnly: true,
+    // Set cookie
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
                 secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
     res.json({
       success: true,
-      message: 'Muvaffaqiyatli kirildi',
+      message: 'Muvaffaqiyatli tasdiqlandi va kirildi',
       user: {
         id: user._id,
         email: user.email,
@@ -252,7 +334,6 @@ export const verifyCode = async (req, res) => {
   }
 };
 
-// Register new user
 export const register = async (req, res) => {
   try {
     const { email, password, name, phone } = req.body;
@@ -264,8 +345,7 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -273,20 +353,17 @@ export const register = async (req, res) => {
       });
     }
 
-    // Create new user
-    const user = new User({
+        const user = new User({
       email,
       password,
       name,
       phone
     });
 
-    // Generate verification code
-    const code = user.generateVerificationCode();
+        const code = user.generateVerificationCode();
     await user.save();
 
-    // Send verification email
-    const emailSent = await sendVerificationCode(email, code);
+        const emailSent = await sendVerificationCode(email, code);
     
     if (!emailSent) {
       return res.status(500).json({ 
@@ -309,10 +386,9 @@ export const register = async (req, res) => {
   }
 };
 
-// Logout
 export const logout = async (req, res) => {
   try {
-        res.clearCookie('token');
+        res.clearCookie('accessToken');
     res.json({ 
       success: true, 
       message: 'Muvaffaqiyatli chiqildi' 

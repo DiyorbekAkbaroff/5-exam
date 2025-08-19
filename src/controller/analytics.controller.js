@@ -2,7 +2,6 @@ import User from '../models/User.js';
 import Car from '../models/Car.js';
 import Order from '../models/Order.js';
 
-// Get comprehensive analytics data
 export const getAnalytics = async (req, res) => {
   try {
     const [
@@ -38,7 +37,6 @@ export const getAnalytics = async (req, res) => {
   }
 };
 
-// User analytics
 const getUserAnalytics = async () => {
   const totalUsers = await User.countDocuments({ role: 'user' });
   const verifiedUsers = await User.countDocuments({ role: 'user', isVerified: true });
@@ -47,7 +45,6 @@ const getUserAnalytics = async () => {
     createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
   });
 
-  // User growth over last 6 months
   const userGrowth = await User.aggregate([
     {
       $match: {
@@ -76,12 +73,10 @@ const getUserAnalytics = async () => {
   };
 };
 
-// Car analytics
 const getCarAnalytics = async () => {
   const totalCars = await Car.countDocuments();
   const availableCars = await Car.countDocuments({ isAvailable: true });
-  
-  // Cars by brand
+
   const carsByBrand = await Car.aggregate([
     {
       $group: {
@@ -94,7 +89,6 @@ const getCarAnalytics = async () => {
     { $limit: 10 }
   ]);
 
-  // Price ranges
   const priceRanges = await Car.aggregate([
     {
       $bucket: {
@@ -119,14 +113,12 @@ const getCarAnalytics = async () => {
   };
 };
 
-// Order analytics
 const getOrderAnalytics = async () => {
   const totalOrders = await Order.countDocuments();
   const totalRevenue = await Order.aggregate([
     { $group: { _id: null, total: { $sum: '$totalPrice' } } }
   ]);
 
-  // Orders by status
   const ordersByStatus = await Order.aggregate([
     {
       $group: {
@@ -137,7 +129,6 @@ const getOrderAnalytics = async () => {
     }
   ]);
 
-  // Monthly revenue
   const monthlyRevenue = await Order.aggregate([
     {
       $match: {
@@ -166,7 +157,6 @@ const getOrderAnalytics = async () => {
   };
 };
 
-// Recent activity
 const getRecentActivity = async () => {
   const recentUsers = await User.find({ role: 'user' })
     .select('name email createdAt')
@@ -186,7 +176,6 @@ const getRecentActivity = async () => {
   };
 };
 
-// Monthly analytics
 const getMonthlyAnalytics = async () => {
   const currentDate = new Date();
   const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);

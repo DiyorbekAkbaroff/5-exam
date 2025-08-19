@@ -6,14 +6,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Create logs directory if it doesn't exist
 import fs from 'fs';
 const logsDir = path.join(__dirname, '../../logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Custom format
 const customFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
@@ -21,36 +19,32 @@ const customFormat = winston.format.combine(
   winston.format.prettyPrint()
 );
 
-// Create logger
 const logger = winston.createLogger({
   level: 'info',
   format: customFormat,
   defaultMeta: { service: 'avto-salon' },
   transports: [
-    // Error logs - separate file
+
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
-      maxsize: 5242880, // 5MB
+      maxsize: 5242880,
       maxFiles: 5,
     }),
-    
-    // Warning logs - separate file
+
     new winston.transports.File({
       filename: path.join(logsDir, 'warning.log'),
       level: 'warn',
-      maxsize: 5242880, // 5MB
+      maxsize: 5242880,
       maxFiles: 5,
     }),
-    
-    // All logs - combined file
+
     new winston.transports.File({
       filename: path.join(logsDir, 'combined.log'),
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     }),
-    
-    // MongoDB transport for all logs
+  
     new winston.transports.MongoDB({
       db: process.env.MONGODB_URI || 'mongodb://localhost:27017/avto-salon',
       collection: 'logs',
@@ -66,7 +60,6 @@ const logger = winston.createLogger({
   ],
 });
 
-// Add console transport in development
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.combine(
@@ -79,7 +72,6 @@ if (process.env.NODE_ENV !== 'production') {
   }));
 }
 
-// Create request logger middleware
 export const requestLogger = (req, res, next) => {
   const start = Date.now();
   

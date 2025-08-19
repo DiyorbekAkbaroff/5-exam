@@ -1,8 +1,29 @@
 <section class="auth">
     <h2>Kirish</h2>
     
-    <!-- Step 1: Email Input -->
-    <div id="step1" class="auth-step">
+    <!-- Login Options -->
+    <div class="login-options">
+        <button id="loginWithPassword" class="btn btn-primary">Email va parol bilan</button>
+        <button id="loginWithCode" class="btn btn-outline">Kod bilan kirish</button>
+    </div>
+    
+    <!-- Password Login Form -->
+    <div id="passwordLogin" class="auth-step">
+        <form id="passwordForm" class="auth-form">
+            <div class="form-group">
+                <label for="loginEmail">Email manzil</label>
+                <input type="email" id="loginEmail" name="email" placeholder="Emailingizni kiriting" required />
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Parol</label>
+                <input type="password" id="loginPassword" name="password" placeholder="Parolingizni kiriting" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Kirish</button>
+        </form>
+    </div>
+    
+    <!-- Code Login - Step 1: Email Input -->
+    <div id="step1" class="auth-step" style="display: none;">
         <form id="emailForm" class="auth-form">
             <div class="form-group">
                 <label for="email">Email manzil</label>
@@ -11,11 +32,11 @@
             <button type="submit" class="btn btn-primary">Kod yuborish</button>
         </form>
         <p class="auth-info">
-            Avval emailingizga 6 xonali kod yuboriladi, keyin kodni kiriting
+            Emailingizga 6 xonali kod yuboriladi
         </p>
     </div>
 
-    <!-- Step 2: Code Verification -->
+    <!-- Code Login - Step 2: Code Verification -->
     <div id="step2" class="auth-step" style="display: none;">
         <form id="codeForm" class="auth-form">
             <div class="form-group">
@@ -40,6 +61,59 @@
 <script>
 let currentEmail = '';
 
+// Login method switcher
+document.getElementById('loginWithPassword').addEventListener('click', () => {
+    document.getElementById('passwordLogin').style.display = 'block';
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('loginWithPassword').classList.add('btn-primary');
+    document.getElementById('loginWithPassword').classList.remove('btn-outline');
+    document.getElementById('loginWithCode').classList.add('btn-outline');
+    document.getElementById('loginWithCode').classList.remove('btn-primary');
+});
+
+document.getElementById('loginWithCode').addEventListener('click', () => {
+    document.getElementById('passwordLogin').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('loginWithCode').classList.add('btn-primary');
+    document.getElementById('loginWithCode').classList.remove('btn-outline');
+    document.getElementById('loginWithPassword').classList.add('btn-outline');
+    document.getElementById('loginWithPassword').classList.remove('btn-primary');
+});
+
+// Password login
+document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        } else {
+            showToast(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Xatolik yuz berdi', 'error');
+    }
+});
+
 // Step 1: Send verification code
 document.getElementById('emailForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -59,7 +133,6 @@ document.getElementById('emailForm').addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (data.success) {
-            // Show success message and move to step 2
             showToast(data.message, 'success');
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'block';
@@ -91,7 +164,6 @@ document.getElementById('codeForm').addEventListener('submit', async (e) => {
         
         if (data.success) {
             showToast(data.message, 'success');
-            // Redirect to home page after successful login
             setTimeout(() => {
                 window.location.href = '/';
             }, 1000);

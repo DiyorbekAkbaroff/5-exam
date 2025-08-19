@@ -1,6 +1,241 @@
 /* =========================================================
    00. ROOT & RESET
    =======================================================*/
+
+/* Login Options Styles */
+.login-options {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.login-options .btn {
+  flex: 1;
+  max-width: 200px;
+  transition: all 0.3s ease;
+}
+
+.login-options .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Profile Page Styles */
+.profile {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.profile-container {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+.profile-card {
+  background: var(--clr-bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.profile-header {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.profile-avatar {
+  position: relative;
+  text-align: center;
+}
+
+.profile-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--clr-primary);
+}
+
+.avatar-upload {
+  margin-top: 1rem;
+}
+
+.profile-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--clr-text);
+  font-size: 1.5rem;
+}
+
+.profile-info .email {
+  color: var(--clr-text-light);
+  margin: 0 0 1rem 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-admin {
+  background: var(--clr-danger);
+  color: white;
+}
+
+.badge-user {
+  background: var(--clr-primary);
+  color: white;
+}
+
+.profile-edit {
+  background: var(--clr-bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.profile-edit h3 {
+  margin-bottom: 1.5rem;
+  color: var(--clr-text);
+}
+
+.profile-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: var(--clr-bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--clr-text);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--clr-text-light);
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: var(--clr-text);
+}
+
+.modal-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.account-actions {
+  background: var(--clr-bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.account-actions h3 {
+  margin-bottom: 1.5rem;
+  color: var(--clr-text);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile {
+    padding: 1rem;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions,
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+}
+
+/* =========================================================
+   00. ROOT & RESET
+   =======================================================*/
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {

@@ -84,6 +84,64 @@ export const updateProfile = catchAsync(async (req, res) => {
   });
 });
 
+// Change password
+export const changePassword = catchAsync(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  const user = await User.findById(req.userId).select('+password');
+  
+  if (!user) {
+    throw new AppError('Foydalanuvchi topilmadi', 404);
+  }
+  
+  // Check current password
+  const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+  
+  if (!isCurrentPasswordValid) {
+    throw new AppError('Joriy parol noto\'g\'ri', 400);
+  }
+  
+  // Update password
+  user.password = newPassword;
+  await user.save();
+  
+  logger.info('Password changed', {
+    userId: req.userId
+  });
+  
+  res.json({
+    success: true,
+    message: 'Parol muvaffaqiyatli o\'zgartirildi'
+  });
+});
+
+// Upload profile image
+export const uploadProfileImage = catchAsync(async (req, res) => {
+  if (!req.file) {
+    throw new AppError('Rasm fayli yuborilmadi', 400);
+  }
+  
+  const imageUrl = `/uploads/profiles/${req.file.filename}`;
+  
+  const user = await User.findByIdAndUpdate(
+    req.userId,
+    { profileImage: imageUrl },
+    { new: true }
+  ).select('-password -refreshToken -passwordResetToken');
+  
+  logger.info('Profile image updated', {
+    userId: req.userId,
+    imageUrl
+  });
+  
+  res.json({
+    success: true,
+    message: 'Profil rasmi yangilandi',
+    imageUrl,
+    data: user
+  });
+});
+
 // Get admin dashboard data
 export const getAdminDashboard = catchAsync(async (req, res) => {
   if (req.user.role !== 'admin') {

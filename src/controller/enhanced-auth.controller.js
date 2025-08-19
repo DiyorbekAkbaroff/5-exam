@@ -5,17 +5,14 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '.
 import { sendVerificationCode, sendPasswordResetEmail } from '../config/email.js';
 import logger from '../config/logger.js';
 
-// Register new user
 export const register = catchAsync(async (req, res) => {
   const { email, password, name, phone } = req.body;
 
-  // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     throw new AppError('Bu email allaqachon ro\'yxatdan o\'tgan', 400);
   }
 
-  // Create new user
   const user = new User({
     email,
     password,
@@ -23,11 +20,9 @@ export const register = catchAsync(async (req, res) => {
     phone
   });
 
-  // Generate verification code
   const code = user.generateVerificationCode();
   await user.save();
 
-  // Send verification email
   const emailSent = await sendVerificationCode(email, code);
   
   if (!emailSent) {
@@ -50,11 +45,9 @@ export const register = catchAsync(async (req, res) => {
   });
 });
 
-// Login user
 export const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
-  // Find user and include password for comparison
   const user = await User.findOne({ email }).select('+password');
   
   if (!user || !(await user.comparePassword(password))) {
@@ -66,7 +59,6 @@ export const login = catchAsync(async (req, res) => {
     throw new AppError('Email yoki parol noto\'g\'ri', 401);
   }
 
-  // Check if user is verified
   if (!user.isVerified) {
     throw new AppError('Email tasdiqlash talab qilinadi', 403);
   }
@@ -74,7 +66,6 @@ export const login = catchAsync(async (req, res) => {
   // Generate token pair
   const { accessToken, refreshToken } = generateTokenPair(user._id);
 
-  // Save refresh token to user
   user.refreshToken = refreshToken;
   user.lastLogin = new Date();
   await user.save();
@@ -83,13 +74,13 @@ export const login = catchAsync(async (req, res) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 15 * 60 * 1000 // 15 minutes
+    maxAge: 15 * 60 * 1000
   });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
   logger.info('User logged in', {
@@ -115,7 +106,6 @@ export const login = catchAsync(async (req, res) => {
   });
 });
 
-// Verify email code
 export const verifyCode = catchAsync(async (req, res) => {
   const { email, code } = req.body;
 
@@ -125,7 +115,6 @@ export const verifyCode = catchAsync(async (req, res) => {
     throw new AppError('Foydalanuvchi topilmadi', 404);
   }
 
-  // Verify code
   const isValid = user.verifyCode(code);
   
   if (!isValid) {
@@ -135,7 +124,6 @@ export const verifyCode = catchAsync(async (req, res) => {
   // Generate token pair
   const { accessToken, refreshToken } = generateTokenPair(user._id);
 
-  // Save refresh token and update last login
   user.refreshToken = refreshToken;
   user.lastLogin = new Date();
   await user.save();
@@ -175,7 +163,6 @@ export const verifyCode = catchAsync(async (req, res) => {
   });
 });
 
-// Refresh access token
 export const refreshToken = catchAsync(async (req, res) => {
   const { refreshToken: token } = req.cookies;
 
@@ -183,23 +170,18 @@ export const refreshToken = catchAsync(async (req, res) => {
     throw new AppError('Refresh token topilmadi', 401);
   }
 
-  // Verify refresh token
   const decoded = verifyRefreshToken(token);
   
-  // Find user and check if refresh token matches
   const user = await User.findById(decoded.userId);
   if (!user || user.refreshToken !== token) {
     throw new AppError('Noto\'g\'ri refresh token', 401);
   }
 
-  // Generate new token pair
   const { accessToken, refreshToken: newRefreshToken } = generateTokenPair(user._id);
 
-  // Update refresh token in database
   user.refreshToken = newRefreshToken;
   await user.save();
 
-  // Set new cookies
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -226,7 +208,6 @@ export const refreshToken = catchAsync(async (req, res) => {
   });
 });
 
-// Forgot password
 export const forgotPassword = catchAsync(async (req, res) => {
   const { email } = req.body;
 
@@ -235,18 +216,15 @@ export const forgotPassword = catchAsync(async (req, res) => {
     throw new AppError('Bu email bilan foydalanuvchi topilmadi', 404);
   }
 
-  // Generate password reset code (6 digits)
   const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
   
-  // Create password reset token
   user.passwordResetToken = user.createPasswordResetToken();
   user.verificationCode = {
     code: resetCode,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
   };
   await user.save();
 
-  // Send reset code via email
   const emailSent = await sendPasswordResetEmail(email, resetCode);
   
   if (!emailSent) {
@@ -272,7 +250,6 @@ export const forgotPassword = catchAsync(async (req, res) => {
   });
 });
 
-// Reset password
 export const resetPassword = catchAsync(async (req, res) => {
   const { email, code, newPassword } = req.body;
 
@@ -281,7 +258,6 @@ export const resetPassword = catchAsync(async (req, res) => {
     throw new AppError('Foydalanuvchi topilmadi', 404);
   }
 
-  // Verify reset code
   if (!user.verificationCode || 
       user.verificationCode.code !== code || 
       user.verificationCode.expiresAt < new Date()) {
@@ -306,13 +282,11 @@ export const resetPassword = catchAsync(async (req, res) => {
   });
 });
 
-// Change password (authenticated user)
 export const changePassword = catchAsync(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   const user = await User.findById(req.userId).select('+password');
   
-  // Verify current password
   if (!(await user.comparePassword(currentPassword))) {
     throw new AppError('Joriy parol noto\'g\'ri', 400);
   }
@@ -332,12 +306,9 @@ export const changePassword = catchAsync(async (req, res) => {
   });
 });
 
-// Logout
 export const logout = catchAsync(async (req, res) => {
-  // Clear refresh token from database
   await User.findByIdAndUpdate(req.userId, { refreshToken: undefined });
 
-  // Clear cookies
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
 
@@ -351,7 +322,6 @@ export const logout = catchAsync(async (req, res) => {
   });
 });
 
-// Get current user
 export const getCurrentUser = catchAsync(async (req, res) => {
   const user = await User.findById(req.userId).select('-password -refreshToken -passwordResetToken');
   
@@ -365,7 +335,6 @@ export const getCurrentUser = catchAsync(async (req, res) => {
   });
 });
 
-// Send verification code (resend)
 export const sendCode = catchAsync(async (req, res) => {
   const { email } = req.body;
 
@@ -378,11 +347,9 @@ export const sendCode = catchAsync(async (req, res) => {
     throw new AppError('Email allaqachon tasdiqlangan', 400);
   }
 
-  // Generate new verification code
   const code = user.generateVerificationCode();
   await user.save();
 
-  // Send email
   const emailSent = await sendVerificationCode(email, code);
   
   if (!emailSent) {
